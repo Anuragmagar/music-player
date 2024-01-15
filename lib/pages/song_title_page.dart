@@ -53,7 +53,7 @@ class _SongTitlePageState extends ConsumerState<SongTitlePage> {
                   width: double.infinity,
                   height: 30,
                   child: Marquee(
-                    text: song.album.toString(),
+                    text: song.title,
                     style: const TextStyle(
                       fontSize: 23,
                       fontFamily: 'CircularStd',

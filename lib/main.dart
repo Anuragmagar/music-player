@@ -1,6 +1,7 @@
 import 'package:audio_app/pages/albums_page.dart';
 import 'package:audio_app/pages/artists_page.dart';
-import 'package:audio_app/pages/bottom_mini_player.dart';
+import 'package:audio_app/pages/BottomMiniplayer/bottom_mini_player.dart';
+import 'package:audio_app/pages/bottom_navbar.dart';
 import 'package:audio_app/pages/home_page.dart';
 import 'package:audio_app/pages/player_screen.dart';
 import 'package:audio_app/pages/playlists_page.dart';
@@ -11,11 +12,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get/get.dart';
-import 'package:miniplayer/miniplayer.dart';
 import 'package:on_audio_query/on_audio_query.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
-import 'package:stylish_bottom_bar/model/bar_items.dart';
-import 'package:stylish_bottom_bar/stylish_bottom_bar.dart';
 
 void main() {
   runApp(const ProviderScope(child: MyApp()));
@@ -57,7 +55,6 @@ class MyHomePage extends ConsumerStatefulWidget {
 }
 
 class _MyHomePageState extends ConsumerState<MyHomePage> {
-  int currentPage = 0;
   List<Widget> pages = const [
     HomePage(),
     AlbumsPage(),
@@ -65,8 +62,6 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
     PlaylistsPage(),
     ArtistsPage(),
   ];
-
-  bool _isNavBarVisible = true;
 
   int songsCount = 0;
   // Main method.
@@ -131,6 +126,7 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
     //   });
     // }
 
+    final int currentPage = ref.watch(currentPageProvider);
     return Scaffold(
       backgroundColor: const Color.fromRGBO(28, 27, 32, 1),
       appBar: AppBar(
@@ -169,65 +165,7 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
           ],
         ),
       ),
-      bottomNavigationBar: StylishBottomBar(
-        backgroundColor: const Color.fromRGBO(42, 41, 49, 1),
-        option: AnimatedBarOptions(
-          barAnimation: BarAnimation.fade,
-          iconStyle: IconStyle.animated,
-          opacity: 0.3,
-        ),
-        items: [
-          BottomBarItem(
-            icon: const PhosphorIcon(
-              PhosphorIconsFill.house,
-            ),
-            selectedColor: Colors.green,
-            title: const Text('Home'),
-          ),
-          BottomBarItem(
-            icon: const Icon(
-              PhosphorIconsFill.vinylRecord,
-              size: 25,
-            ),
-            selectedColor: Colors.green,
-            title: const Text('Albums'),
-            // backgroundColor: Colors.orange,
-          ),
-          BottomBarItem(
-            icon: const Icon(
-              PhosphorIconsFill.musicNote,
-              size: 25,
-            ),
-            selectedColor: Colors.green,
-            title: const Text('Songs'),
-            // backgroundColor: Colors.purple,
-          ),
-          BottomBarItem(
-            icon: const Icon(
-              PhosphorIconsFill.playlist,
-              size: 25,
-            ),
-            selectedColor: Colors.green,
-            title: const Text('Playlists'),
-            // backgroundColor: Colors.purple,
-          ),
-          BottomBarItem(
-            icon: const Icon(
-              PhosphorIconsFill.userList,
-              size: 25,
-            ),
-            selectedColor: Colors.green,
-            title: const Text('Artists'),
-          ),
-        ],
-        currentIndex: currentPage,
-        onTap: (index) {
-          setState(() {
-            currentPage = index;
-            // controller.jumpToPage(index);
-          });
-        },
-      ),
+      bottomNavigationBar: const BottomNavbar(),
     );
   }
 }

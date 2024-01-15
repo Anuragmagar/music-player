@@ -2,15 +2,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:on_audio_query/on_audio_query.dart';
 
+final player = AudioPlayer();
+int currentIndex = player.currentIndex ?? 0;
+
+final currentPageProvider = StateProvider<int>((ref) => 0);
+
 final selectedSongProvider = StateProvider<SongModel?>((ref) {
   return null;
 });
-
-void updateSelectedSong(WidgetRef ref, SongModel newSong) {
-  ref.read(selectedSongProvider.notifier).state = newSong;
-}
-
-final isNavVisibleProvider = StateProvider<bool>((ref) => true);
 
 final songListProvider = StateProvider<List<SongModel>?>((ref) {
   return null;
@@ -18,6 +17,17 @@ final songListProvider = StateProvider<List<SongModel>?>((ref) {
 
 final songsCountProvider = StateProvider((ref) => 0);
 
-final playerProvider = StateProvider((ref) => AudioPlayer());
+final playerProvider = StateProvider((ref) => player);
 
 final isMiniplayerOpenProvider = StateProvider<bool>((ref) => false);
+
+final currentIndexProvider = StateProvider((ref) {
+  return currentIndex;
+});
+
+final currentPlayingMusicProvider = StateProvider<SongModel>((ref) {
+  final songs = ref.read(songListProvider);
+  SongModel selectedSong = songs![currentIndex];
+
+  return selectedSong;
+});

@@ -89,53 +89,19 @@ class _SongsPageState extends ConsumerState<SongsPage> {
                   player.play();
                 },
                 contentPadding: const EdgeInsets.all(0),
-                title: songs[index].title.length < 35
-                    ? Text(
-                        songs[index].title,
-                        style: const TextStyle(color: Colors.white),
-                        maxLines: 1,
-                      )
-                    : SizedBox(
-                        width: double.infinity,
-                        height: 20,
-                        child: Marquee(
-                          text: songs[index].title,
-                          style: TextStyle(color: Colors.white),
-                          scrollAxis: Axis.horizontal,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          blankSpace: 20.0,
-                          velocity: 25.0,
-                          pauseAfterRound: Duration(seconds: 1),
-                          decelerationCurve: Curves.easeOut,
-                          startAfter: Duration(seconds: 3),
-                        ),
-                      ),
-                subtitle: songs[index].artist!.length < 35
-                    ? Text(
-                        '${songs[index].artist}・${formatDuration(songs[index].duration)}',
-                        style: const TextStyle(
-                            color: Color.fromRGBO(218, 218, 218, 1)),
-                        overflow: TextOverflow.ellipsis,
-                        maxLines: 1,
-                      )
-                    : SizedBox(
-                        // width: 250.0,
-                        width: double.infinity,
-                        height: 20,
-                        child: Marquee(
-                          text: songs[index].artist.toString(),
-                          style: const TextStyle(
-                            color: Color.fromRGBO(218, 218, 218, 1),
-                          ),
-                          scrollAxis: Axis.horizontal,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          blankSpace: 20.0,
-                          velocity: 25.0,
-                          pauseAfterRound: Duration(seconds: 1),
-                          decelerationCurve: Curves.easeOut,
-                          startAfter: Duration(seconds: 3),
-                        ),
-                      ),
+                title: Text(
+                  songs[index].title,
+                  style: const TextStyle(color: Colors.white),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                subtitle: Text(
+                  '${songs[index].artist}・${formatDuration(songs[index].duration)}',
+                  style:
+                      const TextStyle(color: Color.fromRGBO(218, 218, 218, 1)),
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
+                ),
                 leading: ClipRRect(
                   borderRadius: const BorderRadius.all(Radius.circular(10.0)),
                   child: QueryArtworkWidget(
