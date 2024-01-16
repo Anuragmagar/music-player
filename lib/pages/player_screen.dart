@@ -1,16 +1,13 @@
 import 'dart:async';
 
 import 'package:audio_app/pages/artwork_widget.dart';
-import 'package:audio_app/pages/lyrics_page.dart';
 import 'package:audio_app/pages/playing_title.dart';
 import 'package:audio_app/pages/slider_page.dart';
 import 'package:audio_app/pages/song_title_page.dart';
 import 'package:audio_app/providers.dart';
-import 'package:audiotagger/audiotagger.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:marquee/marquee.dart';
 import 'package:on_audio_query/on_audio_query.dart';
 import 'package:palette_generator/palette_generator.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
@@ -27,14 +24,9 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
   final OnAudioQuery audioQuery = OnAudioQuery();
   late StreamSubscription<int?> indexStream;
 
-  late Future<Gradient?> _generatedGradient;
-
   late String lyric;
 
   List<Color> colors = [
-    // paletteGenerator.dominantColor?.color ?? Colors.white,
-    // paletteGenerator.darkVibrantColor?.color ?? Colors.white,
-    // paletteGenerator.darkMutedColor?.color ?? Colors.white,
     const Color.fromRGBO(24, 24, 26, 1),
     const Color.fromRGBO(24, 24, 26, 1)
   ];
@@ -44,18 +36,12 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    // _generatedGradient = _generateGradientFromImage();
     _generateGradientFromImage();
 
     SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
       systemNavigationBarColor: Color.fromRGBO(42, 41, 49, 1),
       systemNavigationBarDividerColor: Color.fromRGBO(42, 41, 49, 1),
     ));
-
-    // _generatedGradient = _generateGradientFromImage();
-    // WidgetsBinding.instance.addPostFrameCallback({
-
-    // });
   }
 
   @override
@@ -81,7 +67,6 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
   //   });
   // }
 
-  // Future<Gradient?> _generateGradientFromImage() async {
   _generateGradientFromImage() async {
     final player = ref.watch(playerProvider);
     final songs = ref.read(songListProvider);
@@ -102,20 +87,9 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
     setState(() {
       colors = [
         paletteGenerator.dominantColor?.color ?? Colors.white,
-        // paletteGenerator.darkVibrantColor?.color ?? Colors.white,
-        // paletteGenerator.darkMutedColor?.color ?? Colors.white,
         const Color.fromRGBO(24, 24, 26, 1)
       ];
-
-      // stops = [0.0, 0.6];
     });
-
-    // return LinearGradient(
-    //   colors: colors,
-    //   stops: stops,
-    //   begin: Alignment.topCenter,
-    //   end: Alignment.bottomCenter,
-    // );
   }
 
   Future<Uint8List?> getArtworkBytes(int audioId) async {
@@ -130,7 +104,13 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
     );
   }
 
-  // _generateGradientFromImage();
+  @override
+  void didUpdateWidget(covariant PlayerScreen oldWidget) {
+    // TODO: implement didUpdateWidget
+    super.didUpdateWidget(oldWidget);
+    _generateGradientFromImage();
+  }
+
   @override
   Widget build(BuildContext context) {
     var height = MediaQuery.of(context).viewPadding.top;
@@ -146,7 +126,7 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
         setState(() {
           songIndex = p!;
           song = songs[songIndex];
-          _generateGradientFromImage();
+          // _generateGradientFromImage();
         });
       }
     });
