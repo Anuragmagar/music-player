@@ -22,7 +22,7 @@ class _BottomLinearProgressState extends ConsumerState<BottomLinearProgress> {
       setState(() {
         percentage =
             double.parse((p.inSeconds / duration.inSeconds).toStringAsFixed(1));
-        print(percentage);
+        // print(percentage);
       });
       // setState(() {
       //   print('heyy this is p value $p');

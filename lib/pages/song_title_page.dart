@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:audio_app/providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -13,17 +15,27 @@ class SongTitlePage extends ConsumerStatefulWidget {
 }
 
 class _SongTitlePageState extends ConsumerState<SongTitlePage> {
+  late StreamSubscription<int?> indexStream;
+
+  @override
+  void dispose() {
+    indexStream.cancel();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     final player = ref.read(playerProvider);
     final songs = ref.watch(songListProvider);
     int songIndex = player.currentIndex!;
     SongModel song = songs![songIndex];
-    player.currentIndexStream.listen((p) {
-      setState(() {
-        songIndex = p!;
-        song = songs[songIndex];
-      });
+    indexStream = player.currentIndexStream.listen((p) {
+      if (p != songIndex) {
+        setState(() {
+          songIndex = p!;
+          song = songs[songIndex];
+        });
+      }
     });
 
     return Row(
@@ -49,7 +61,6 @@ class _SongTitlePageState extends ConsumerState<SongTitlePage> {
                 ),
               if (song.title.length >= 35)
                 SizedBox(
-                  // width: 250.0,
                   width: double.infinity,
                   height: 30,
                   child: Marquee(

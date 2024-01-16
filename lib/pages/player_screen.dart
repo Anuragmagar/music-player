@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:audio_app/pages/artwork_widget.dart';
 import 'package:audio_app/pages/lyrics_page.dart';
 import 'package:audio_app/pages/playing_title.dart';
@@ -23,17 +25,27 @@ class PlayerScreen extends ConsumerStatefulWidget {
 
 class _PlayerScreenState extends ConsumerState<PlayerScreen> {
   final OnAudioQuery audioQuery = OnAudioQuery();
+  late StreamSubscription<int?> indexStream;
 
   late Future<Gradient?> _generatedGradient;
 
   late String lyric;
 
+  List<Color> colors = [
+    // paletteGenerator.dominantColor?.color ?? Colors.white,
+    // paletteGenerator.darkVibrantColor?.color ?? Colors.white,
+    // paletteGenerator.darkMutedColor?.color ?? Colors.white,
+    const Color.fromRGBO(24, 24, 26, 1),
+    const Color.fromRGBO(24, 24, 26, 1)
+  ];
+  List<double> stops = [0.0, 0.6];
+
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    // _generateGradientFromImage();
     // _generatedGradient = _generateGradientFromImage();
+    _generateGradientFromImage();
 
     SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
       systemNavigationBarColor: Color.fromRGBO(42, 41, 49, 1),
@@ -48,17 +60,14 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
 
   @override
   void dispose() {
+    indexStream.cancel();
+
     SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
       systemNavigationBarColor: Color.fromRGBO(42, 41, 49, 1),
       systemNavigationBarDividerColor: Color.fromRGBO(42, 41, 49, 1),
     ));
-    super.dispose();
-  }
 
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _generatedGradient = _generateGradientFromImage();
+    super.dispose();
   }
 
   // getLyric() async {
@@ -72,7 +81,8 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
   //   });
   // }
 
-  Future<Gradient?> _generateGradientFromImage() async {
+  // Future<Gradient?> _generateGradientFromImage() async {
+  _generateGradientFromImage() async {
     final player = ref.watch(playerProvider);
     final songs = ref.read(songListProvider);
     int songIndex = player.currentIndex!;
@@ -89,21 +99,23 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
     final PaletteGenerator paletteGenerator =
         await PaletteGenerator.fromImage(image);
 
-    final List<Color> colors = [
-      paletteGenerator.dominantColor?.color ?? Colors.white,
-      // paletteGenerator.darkVibrantColor?.color ?? Colors.white,
-      // paletteGenerator.darkMutedColor?.color ?? Colors.white,
-      const Color.fromRGBO(24, 24, 26, 1)
-    ];
+    setState(() {
+      colors = [
+        paletteGenerator.dominantColor?.color ?? Colors.white,
+        // paletteGenerator.darkVibrantColor?.color ?? Colors.white,
+        // paletteGenerator.darkMutedColor?.color ?? Colors.white,
+        const Color.fromRGBO(24, 24, 26, 1)
+      ];
 
-    final List<double> stops = [0.0, 0.6];
+      // stops = [0.0, 0.6];
+    });
 
-    return LinearGradient(
-      colors: colors,
-      stops: stops,
-      begin: Alignment.topCenter,
-      end: Alignment.bottomCenter,
-    );
+    // return LinearGradient(
+    //   colors: colors,
+    //   stops: stops,
+    //   begin: Alignment.topCenter,
+    //   end: Alignment.bottomCenter,
+    // );
   }
 
   Future<Uint8List?> getArtworkBytes(int audioId) async {
@@ -123,118 +135,122 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
   Widget build(BuildContext context) {
     var height = MediaQuery.of(context).viewPadding.top;
 
-    // final song = ref.watch(selectedSongProvider);
-    final songs = ref.watch(songListProvider);
     final player = ref.read(playerProvider);
-    final songIndex = player.currentIndex;
-    final song = songs![songIndex!];
+    final songs = ref.watch(songListProvider);
+    int songIndex = player.currentIndex!;
+    SongModel song = songs![songIndex];
+
+    _generateGradientFromImage();
+    indexStream = player.currentIndexStream.listen((p) {
+      if (p != songIndex) {
+        setState(() {
+          songIndex = p!;
+          song = songs[songIndex];
+          _generateGradientFromImage();
+        });
+      }
+    });
 
     return Scaffold(
       backgroundColor: const Color.fromRGBO(24, 24, 26, 1),
-      body: FutureBuilder<Gradient?>(
-        future: _generatedGradient,
-        builder: (BuildContext context, AsyncSnapshot<Gradient?> snapshot) {
-          if (snapshot.connectionState == ConnectionState.done) {
-            if (snapshot.hasError) {
-              print(snapshot.error);
-              return Center(child: Text('Error: ${snapshot.error}'));
-            }
-            return Container(
-              decoration: BoxDecoration(gradient: snapshot.data),
-              child: Padding(
-                padding: EdgeInsets.only(top: height, left: 25, right: 25),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  // mainAxisSize: MainAxisSize.max,
-                  children: [
-                    const PlayingTitle(),
-                    const SizedBox(height: 50),
-                    const ArtworkWidget(),
-                    const SizedBox(height: 50),
-                    const SongTitlePage(),
-                    const SizedBox(height: 25),
-                    const SliderPage(),
-                    const SizedBox(
-                      height: 25,
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Icon(
-                          PhosphorIconsRegular.repeat,
-                          size: 25,
-                        ),
-                        GestureDetector(
-                          onTap: () {
-                            setState(() {
-                              player.seekToPrevious();
-                            });
-                          },
-                          child: const Icon(
-                            PhosphorIconsFill.skipBack,
-                            size: 25,
-                          ),
-                        ),
-                        GestureDetector(
-                          onTap: () {
-                            if (player.playing) {
-                              setState(() {
-                                player.pause();
-                              });
-                            } else {
-                              setState(() {
-                                player.play();
-                              });
-                            }
-                          },
-                          child: Container(
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(50),
-                            ),
-                            child: Padding(
-                              padding: const EdgeInsets.all(25.0),
-                              child: Icon(
-                                player.playing
-                                    ? PhosphorIconsFill.pause
-                                    : PhosphorIconsFill.play,
-                                size: 25,
-                                color: const Color.fromRGBO(52, 35, 35, 1),
-                              ),
-                            ),
-                          ),
-                        ),
-                        GestureDetector(
-                          onTap: () {
-                            setState(() {
-                              player.seekToNext();
-                            });
-                          },
-                          child: const Icon(
-                            PhosphorIconsFill.skipForward,
-                            size: 25,
-                          ),
-                        ),
-                        const Icon(
-                          PhosphorIconsRegular.shuffle,
-                          size: 25,
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 35),
-                    const Text(
-                      'M4A · 162 KBPS · 44.1 KHZ',
-                    ),
-                    const SizedBox(height: 20),
-                  ],
-                ),
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: colors,
+            stops: stops,
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+        ),
+        child: Padding(
+          padding: EdgeInsets.only(top: height, left: 25, right: 25),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            // mainAxisSize: MainAxisSize.max,
+            children: [
+              const PlayingTitle(),
+              const SizedBox(height: 50),
+              const ArtworkWidget(),
+              const SizedBox(height: 50),
+              const SongTitlePage(),
+              const SizedBox(height: 25),
+              const SliderPage(),
+              const SizedBox(
+                height: 25,
               ),
-            );
-          } else {
-            return const Center(child: CircularProgressIndicator());
-          }
-        },
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Icon(
+                    PhosphorIconsRegular.repeat,
+                    size: 25,
+                  ),
+                  GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        player.seekToPrevious();
+                      });
+                    },
+                    child: const Icon(
+                      PhosphorIconsFill.skipBack,
+                      size: 25,
+                    ),
+                  ),
+                  GestureDetector(
+                    onTap: () {
+                      if (player.playing) {
+                        setState(() {
+                          player.pause();
+                        });
+                      } else {
+                        setState(() {
+                          player.play();
+                        });
+                      }
+                    },
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(50),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(25.0),
+                        child: Icon(
+                          player.playing
+                              ? PhosphorIconsFill.pause
+                              : PhosphorIconsFill.play,
+                          size: 25,
+                          color: const Color.fromRGBO(52, 35, 35, 1),
+                        ),
+                      ),
+                    ),
+                  ),
+                  GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        player.seekToNext();
+                      });
+                    },
+                    child: const Icon(
+                      PhosphorIconsFill.skipForward,
+                      size: 25,
+                    ),
+                  ),
+                  const Icon(
+                    PhosphorIconsRegular.shuffle,
+                    size: 25,
+                  ),
+                ],
+              ),
+              const SizedBox(height: 35),
+              const Text(
+                'M4A · 162 KBPS · 44.1 KHZ',
+              ),
+              const SizedBox(height: 20),
+            ],
+          ),
+        ),
       ),
     );
   }
