@@ -13,6 +13,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get/get.dart';
 import 'package:on_audio_query/on_audio_query.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 void main() {
@@ -73,6 +74,7 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
   void initState() {
     super.initState();
 
+    _checkPermissions();
     checkAndRequestPermissions();
 
     getSongs();
@@ -83,6 +85,12 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
     ));
   }
 
+  _checkPermissions() async {
+    if (!await Permission.storage.request().isGranted) {
+      await _checkPermissions();
+    }
+  }
+
   checkAndRequestPermissions({bool retry = true}) async {
     // The param 'retryRequest' is false, by default.
     _hasPermission = await audioQuery.checkAndRequest(
@@ -90,7 +98,20 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
     );
 
     // Only call update the UI if application has all required permissions.
-    _hasPermission ? setState(() {}) : null;
+    _hasPermission
+        ? setState(() {})
+        : ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content:
+                  const Text('Please grant storage permission to use the app'),
+              action: SnackBarAction(
+                label: 'Grant',
+                onPressed: () {
+                  checkAndRequestPermissions(retry: true);
+                },
+              ),
+            ),
+          );
   }
 
   getSongs() async {
@@ -100,31 +121,22 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
       uriType: UriType.EXTERNAL,
       ignoreCase: true,
     );
-    ref.read(songListProvider.notifier).update((state) => audios);
-    ref.read(songsCountProvider.notifier).update((state) => audios.length);
+
+    List<SongModel> filteredAudios = [];
+    for (var audio in audios) {
+      if (audio.duration != null && audio.duration! > 60000) {
+        filteredAudios.add(audio);
+      }
+    }
+    ref.read(songListProvider.notifier).update((state) => filteredAudios);
+    ref
+        .read(songsCountProvider.notifier)
+        .update((state) => filteredAudios.length);
   }
 
   @override
   Widget build(BuildContext context) {
-    // var selectedSong = ref.watch(selectedSongProvider);
-
-    // final player = ref.read(playerProvider);
-    // final songs = ref.watch(songListProvider);
-    // SongModel selectedSong = ref.watch(selectedSongProvider)!;
-
     bool isMiniplayerOpen = ref.watch(isMiniplayerOpenProvider);
-    // late SongModel selectedSong;
-
-    // final player = ref.watch(playerProvider);
-    // if (isMiniplayerOpen) {
-    //   // if (player.playing) {
-    //   int songIndex = player.currentIndex!;
-
-    //   // }
-    //   player.currentIndexStream.listen((state) {
-    //     selectedSong = songs![state!];
-    //   });
-    // }
 
     final int currentPage = ref.watch(currentPageProvider);
     return Scaffold(
@@ -151,10 +163,11 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
       body: SafeArea(
         child: Stack(
           children: [
-            Padding(
-              padding: const EdgeInsets.only(right: 20, left: 16),
-              child: IndexedStack(index: currentPage, children: pages),
-            ),
+            // Padding(
+            // padding: const EdgeInsets.only(right: 20, left: 16),
+            // child:
+            IndexedStack(index: currentPage, children: pages),
+            // ),
             if (isMiniplayerOpen)
               const Positioned(
                 bottom: 0,
@@ -169,26 +182,26 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
     );
   }
 }
-  // Widget noAccessToLibraryWidget() {
-  //   return Center(
-  //     child: Container(
-  //       decoration: BoxDecoration(
-  //         borderRadius: BorderRadius.circular(10),
-  //         color: Colors.redAccent.withOpacity(0.5),
-  //       ),
-  //       padding: const EdgeInsets.all(20),
-  //       child: Column(
-  //         mainAxisSize: MainAxisSize.min,
-  //         children: [
-  //           const Text("Application doesn't have access to the library"),
-  //           const SizedBox(height: 10),
-  //           ElevatedButton(
-  //             onPressed: () => checkAndRequestPermissions(retry: true),
-  //             child: const Text("Allow"),
-  //           ),
-  //         ],
-  //       ),
-  //     ),
-  //   );
-  // }
+// Widget noAccessToLibraryWidget() {
+//   return Center(
+//     child: Container(
+//       decoration: BoxDecoration(
+//         borderRadius: BorderRadius.circular(10),
+//         color: Colors.redAccent.withOpacity(0.5),
+//       ),
+//       padding: const EdgeInsets.all(20),
+//       child: Column(
+//         mainAxisSize: MainAxisSize.min,
+//         children: [
+//           const Text("Application doesn't have access to the library"),
+//           const SizedBox(height: 10),
+//           ElevatedButton(
+//             onPressed: () => checkAndRequestPermissions(retry: true),
+//             child: const Text("Allow"),
+//           ),
+//         ],
+//       ),
+//     ),
+//   );
+// }
 // }

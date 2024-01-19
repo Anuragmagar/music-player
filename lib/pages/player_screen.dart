@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:audio_app/pages/artwork_widget.dart';
 import 'package:audio_app/pages/playing_title.dart';
 import 'package:audio_app/pages/slider_page.dart';
+import 'package:audio_app/pages/song_info.dart';
 import 'package:audio_app/pages/song_title_page.dart';
 import 'package:audio_app/providers.dart';
 import 'package:flutter/material.dart';
@@ -86,7 +87,9 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
 
     setState(() {
       colors = [
-        paletteGenerator.dominantColor?.color ?? Colors.white,
+        // paletteGenerator.dominantColor?.color ?? Colors.white,
+        // const Color.fromRGBO(24, 24, 26, 1)
+        paletteGenerator.mutedColor?.color ?? Colors.white,
         const Color.fromRGBO(24, 24, 26, 1)
       ];
     });
@@ -166,16 +169,27 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
                     PhosphorIconsRegular.repeat,
                     size: 25,
                   ),
-                  GestureDetector(
-                    onTap: () {
+                  // GestureDetector(
+                  //   onTap: () {
+                  //     setState(() {
+                  //       player.seekToPrevious();
+                  //     });
+                  //   },
+                  //   child: const Icon(
+                  //     PhosphorIconsFill.skipBack,
+                  //     size: 25,
+                  //   ),
+                  // ),
+                  IconButton(
+                    onPressed: () {
                       setState(() {
                         player.seekToPrevious();
                       });
                     },
-                    child: const Icon(
+                    icon: const Icon(
                       PhosphorIconsFill.skipBack,
-                      size: 25,
                     ),
+                    iconSize: 25,
                   ),
                   GestureDetector(
                     onTap: () {
@@ -206,17 +220,31 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
                       ),
                     ),
                   ),
-                  GestureDetector(
-                    onTap: () {
+
+                  IconButton(
+                    onPressed: () {
                       setState(() {
-                        player.seekToNext();
+                        setState(() {
+                          player.seekToNext();
+                        });
                       });
                     },
-                    child: const Icon(
+                    icon: const Icon(
                       PhosphorIconsFill.skipForward,
-                      size: 25,
                     ),
+                    iconSize: 25,
                   ),
+                  // GestureDetector(
+                  //   onTap: () {
+                  //     setState(() {
+                  //       player.seekToNext();
+                  //     });
+                  //   },
+                  //   child: const Icon(
+                  //     PhosphorIconsFill.skipForward,
+                  //     size: 25,
+                  //   ),
+                  // ),
                   const Icon(
                     PhosphorIconsRegular.shuffle,
                     size: 25,
@@ -224,9 +252,7 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
                 ],
               ),
               const SizedBox(height: 35),
-              const Text(
-                'M4A · 162 KBPS · 44.1 KHZ',
-              ),
+              const SongInfo(),
               const SizedBox(height: 20),
             ],
           ),

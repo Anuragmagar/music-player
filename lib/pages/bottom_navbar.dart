@@ -17,65 +17,25 @@ class _BottomNavbarState extends ConsumerState<BottomNavbar> {
   @override
   Widget build(BuildContext context) {
     final currentPage = ref.watch(currentPageProvider);
-    return StylishBottomBar(
+    return NavigationBar(
       backgroundColor: const Color.fromRGBO(42, 41, 49, 1),
-      option: AnimatedBarOptions(
-        barAnimation: BarAnimation.fade,
-        iconStyle: IconStyle.animated,
-        opacity: 0.3,
-      ),
-      items: [
-        BottomBarItem(
-          icon: const PhosphorIcon(
-            PhosphorIconsFill.house,
-          ),
-          selectedColor: Colors.green,
-          title: const Text('Home'),
-        ),
-        BottomBarItem(
-          icon: const Icon(
-            PhosphorIconsFill.vinylRecord,
-            size: 25,
-          ),
-          selectedColor: Colors.green,
-          title: const Text('Albums'),
-          // backgroundColor: Colors.orange,
-        ),
-        BottomBarItem(
-          icon: const Icon(
-            PhosphorIconsFill.musicNote,
-            size: 25,
-          ),
-          selectedColor: Colors.green,
-          title: const Text('Songs'),
-          // backgroundColor: Colors.purple,
-        ),
-        BottomBarItem(
-          icon: const Icon(
-            PhosphorIconsFill.playlist,
-            size: 25,
-          ),
-          selectedColor: Colors.green,
-          title: const Text('Playlists'),
-          // backgroundColor: Colors.purple,
-        ),
-        BottomBarItem(
-          icon: const Icon(
-            PhosphorIconsFill.userList,
-            size: 25,
-          ),
-          selectedColor: Colors.green,
-          title: const Text('Artists'),
-        ),
-      ],
-      currentIndex: currentPage,
-      onTap: (index) {
+      surfaceTintColor: const Color.fromRGBO(42, 41, 49, 1),
+      selectedIndex: currentPage,
+      onDestinationSelected: (index) {
         ref.read(currentPageProvider.notifier).update((state) => index);
-        // setState(() {
-        //   currentPage = index;
-        //   // controller.jumpToPage(index);
-        // });
       },
+      destinations: const [
+        NavigationDestination(
+            icon: PhosphorIcon(PhosphorIconsFill.house), label: 'Home'),
+        NavigationDestination(
+            icon: PhosphorIcon(PhosphorIconsFill.vinylRecord), label: 'Albums'),
+        NavigationDestination(
+            icon: PhosphorIcon(PhosphorIconsFill.musicNote), label: 'Songs'),
+        NavigationDestination(
+            icon: PhosphorIcon(PhosphorIconsFill.playlist), label: 'Playlists'),
+        NavigationDestination(
+            icon: PhosphorIcon(PhosphorIconsFill.userList), label: 'Artists'),
+      ],
     );
   }
 }

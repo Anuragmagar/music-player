@@ -50,7 +50,7 @@ class _SongTitlePageState extends ConsumerState<SongTitlePage> {
                   child: Text(
                     song.title,
                     style: const TextStyle(
-                      fontSize: 23,
+                      fontSize: 20,
                       fontFamily: 'CircularStd',
                       fontWeight: FontWeight.w900,
                       letterSpacing: -1,
@@ -66,7 +66,7 @@ class _SongTitlePageState extends ConsumerState<SongTitlePage> {
                   child: Marquee(
                     text: song.title,
                     style: const TextStyle(
-                      fontSize: 23,
+                      fontSize: 20,
                       fontFamily: 'CircularStd',
                       fontWeight: FontWeight.w900,
                       letterSpacing: -1,
@@ -84,10 +84,10 @@ class _SongTitlePageState extends ConsumerState<SongTitlePage> {
                 child: Text(
                   song.artist.toString(),
                   style: const TextStyle(
-                    fontSize: 18,
+                    fontSize: 16,
                     fontFamily: 'CircularStd',
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: -1,
+                    // fontWeight: FontWeight.w900,
+                    // letterSpacing: -1,
                     color: Color.fromRGBO(179, 179, 178, 1),
                   ),
                   maxLines: 1,

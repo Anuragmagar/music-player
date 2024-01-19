@@ -1,9 +1,3 @@
-import 'package:audio_app/providers.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:just_audio/just_audio.dart';
-import 'package:on_audio_query/on_audio_query.dart';
-import 'package:rxdart/rxdart.dart';
-
 class AudioPlayerManager {
   // final player = StateProvider<SongModel>((ref) {
   //   ref.read(playerProvider);
@@ -33,8 +27,10 @@ class DurationState {
     required this.progress,
     required this.buffered,
     this.total,
+    this.currentIndex,
   });
   final Duration progress;
   final Duration buffered;
   final Duration? total;
+  final int? currentIndex;
 }

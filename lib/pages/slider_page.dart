@@ -16,8 +16,8 @@ class SliderPage extends ConsumerStatefulWidget {
 
 class _SliderPageState extends ConsumerState<SliderPage> {
   // late Duration _position;
-  Duration _position = const Duration(minutes: 0);
-  Duration _bufferedPosition = const Duration(minutes: 0);
+  // Duration _position = const Duration(minutes: 0);
+  // Duration _bufferedPosition = const Duration(minutes: 0);
 
   late AudioPlayerManager manager;
 
@@ -58,7 +58,7 @@ class _SliderPageState extends ConsumerState<SliderPage> {
   @override
   Widget build(BuildContext context) {
     final player = ref.read(playerProvider);
-    final songs = ref.watch(songListProvider);
+    // final songs = ref.watch(songListProvider);
 
     // player.positionStream.listen((p) {
     //   setState(() {
@@ -101,58 +101,15 @@ class _SliderPageState extends ConsumerState<SliderPage> {
           onSeek: (value) {
             player.seek(value);
           },
+          barHeight: 5,
+          thumbRadius: 7,
+          progressBarColor: Colors.white,
+          thumbColor: Colors.white,
+          bufferedBarColor: Colors.grey,
+          baseBarColor: Colors.white24,
+          thumbGlowRadius: 20,
         );
       },
     );
-
-    // return StreamBuilder<PlayerState>(
-    //   stream: manager.player.playerStateStream,
-    //   builder: (context, snapshot) {
-    //     final playerState = snapshot.data;
-    //     final processingState = playerState?.processingState;
-    //     final playing = playerState?.playing;
-    //     if (processingState == ProcessingState.loading ||
-    //         processingState == ProcessingState.buffering) {
-    //       return Container(
-    //         margin: const EdgeInsets.all(8.0),
-    //         width: 32.0,
-    //         height: 32.0,
-    //         child: const CircularProgressIndicator(),
-    //       );
-    //     } else if (playing != true) {
-    //       return IconButton(
-    //         icon: const Icon(Icons.play_arrow),
-    //         iconSize: 32.0,
-    //         onPressed: manager.player.play,
-    //       );
-    //     } else if (processingState != ProcessingState.completed) {
-    //       return IconButton(
-    //         icon: const Icon(Icons.pause),
-    //         iconSize: 32.0,
-    //         onPressed: manager.player.pause,
-    //       );
-    //     } else {
-    //       return IconButton(
-    //         icon: const Icon(Icons.replay),
-    //         iconSize: 32.0,
-    //         onPressed: () => manager.player.seek(Duration.zero),
-    //       );
-    //     }
-    //   },
-    // );
-    // return Consumer(
-    //   builder: ((context, ref, child) {
-    //     return ProgressBar(
-    //       // progress: Duration(minutes: 1),
-    //       progress: _position,
-    //       // total: Duration(minutes: 3, seconds: 30),
-    //       total: player.duration!,
-    //       onSeek: (value) {
-    //         player.seek(value);
-    //       },
-    //       buffered: _bufferedPosition,
-    //     );
-    //   }),
-    // );
   }
 }

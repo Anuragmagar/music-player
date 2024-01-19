@@ -2,7 +2,6 @@ import 'package:audio_app/pages/lyrics_page.dart';
 import 'package:audio_app/providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:just_audio/just_audio.dart';
 import 'package:on_audio_query/on_audio_query.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
@@ -42,12 +41,13 @@ class _ArtworkWidgetState extends ConsumerState<ArtworkWidget> {
           type: ArtworkType.AUDIO,
           artworkBorder: BorderRadius.zero,
           nullArtworkWidget: Container(
-            color: Colors.black,
+            color: Colors.white60,
             height: 350,
             width: double.infinity,
             child: const Icon(
               PhosphorIconsDuotone.musicNote,
-              size: 30,
+              size: 60,
+              color: Colors.white,
             ),
           ),
         ),
