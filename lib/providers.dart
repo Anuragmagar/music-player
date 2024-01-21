@@ -35,3 +35,11 @@ final currentPlayingMusicProvider = StateProvider<SongModel>((ref) {
 
   return selectedSong;
 });
+
+final loopModeProvider = StateProvider<String>((ref) {
+  return "off";
+});
+
+final isShuffleModeProvider = StateProvider<bool>((ref) {
+  return false;
+});

@@ -9,6 +9,7 @@ import 'package:audio_app/providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:just_audio/just_audio.dart';
 import 'package:on_audio_query/on_audio_query.dart';
 import 'package:palette_generator/palette_generator.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
@@ -120,6 +121,8 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
 
     final player = ref.read(playerProvider);
     final songs = ref.watch(songListProvider);
+    final String loopMode = ref.watch(loopModeProvider);
+    final bool isShuffle = ref.watch(isShuffleModeProvider);
     int songIndex = player.currentIndex!;
     SongModel song = songs![songIndex];
 
@@ -165,21 +168,37 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Icon(
-                    PhosphorIconsRegular.repeat,
-                    size: 25,
+                  GestureDetector(
+                    onTap: () async {
+                      if (loopMode == 'off') {
+                        await player.setLoopMode(LoopMode.all);
+                        ref
+                            .read(loopModeProvider.notifier)
+                            .update((ref) => 'all');
+                      }
+                      if (loopMode == 'all') {
+                        await player.setLoopMode(LoopMode.one);
+                        ref
+                            .read(loopModeProvider.notifier)
+                            .update((ref) => 'one');
+                      }
+                      if (loopMode == 'one') {
+                        await player.setLoopMode(LoopMode.off);
+                        ref
+                            .read(loopModeProvider.notifier)
+                            .update((ref) => 'off');
+                      }
+                    },
+                    child: Icon(
+                      (loopMode == 'off')
+                          ? PhosphorIconsRegular.repeat
+                          : (loopMode == 'all')
+                              ? PhosphorIconsRegular.repeat
+                              : PhosphorIconsRegular.repeatOnce,
+                      size: 25,
+                      color: loopMode == 'off' ? Colors.white54 : Colors.white,
+                    ),
                   ),
-                  // GestureDetector(
-                  //   onTap: () {
-                  //     setState(() {
-                  //       player.seekToPrevious();
-                  //     });
-                  //   },
-                  //   child: const Icon(
-                  //     PhosphorIconsFill.skipBack,
-                  //     size: 25,
-                  //   ),
-                  // ),
                   IconButton(
                     onPressed: () {
                       setState(() {
@@ -220,7 +239,6 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
                       ),
                     ),
                   ),
-
                   IconButton(
                     onPressed: () {
                       setState(() {
@@ -234,20 +252,25 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
                     ),
                     iconSize: 25,
                   ),
-                  // GestureDetector(
-                  //   onTap: () {
-                  //     setState(() {
-                  //       player.seekToNext();
-                  //     });
-                  //   },
-                  //   child: const Icon(
-                  //     PhosphorIconsFill.skipForward,
-                  //     size: 25,
-                  //   ),
-                  // ),
-                  const Icon(
-                    PhosphorIconsRegular.shuffle,
-                    size: 25,
+                  GestureDetector(
+                    onTap: () async {
+                      if (isShuffle) {
+                        await player.setShuffleModeEnabled(false);
+                        ref
+                            .read(isShuffleModeProvider.notifier)
+                            .update((state) => false);
+                      } else {
+                        await player.setShuffleModeEnabled(true);
+                        ref
+                            .read(isShuffleModeProvider.notifier)
+                            .update((state) => true);
+                      }
+                    },
+                    child: Icon(
+                      PhosphorIconsRegular.shuffle,
+                      size: 25,
+                      color: isShuffle ? Colors.white : Colors.white54,
+                    ),
                   ),
                 ],
               ),
