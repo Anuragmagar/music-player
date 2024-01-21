@@ -2,6 +2,7 @@ import 'package:audio_app/providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:just_audio/just_audio.dart';
+import 'package:just_audio_background/just_audio_background.dart';
 import 'package:on_audio_query/on_audio_query.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
@@ -43,8 +44,21 @@ class _SongTileState extends ConsumerState<SongTile> {
     final playlist = ConcatenatingAudioSource(
       // Start loading next item just before reaching it
       useLazyPreparation: true,
-      children:
-          songs.map((song) => AudioSource.uri(Uri.parse(song.uri!))).toList(),
+      children: songs
+          .map(
+            (song) => AudioSource.uri(
+              Uri.parse(song.uri!),
+              tag: MediaItem(
+                // Specify a unique ID for each media item:
+                id: song.id.toString(),
+                // Metadata to display in the notification:
+                album: song.album,
+                title: song.title,
+                artUri: Uri.parse('https://placehold.co/600x400'),
+              ),
+            ),
+          )
+          .toList(),
     );
 
     return ListTile(

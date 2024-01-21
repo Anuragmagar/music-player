@@ -12,11 +12,20 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get/get.dart';
+import 'package:just_audio_background/just_audio_background.dart';
 import 'package:on_audio_query/on_audio_query.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
-void main() {
+// void main() {
+//   runApp(const ProviderScope(child: MyApp()));
+// }
+Future<void> main() async {
+  await JustAudioBackground.init(
+    androidNotificationChannelId: 'com.ryanheise.bg_demo.channel.audio',
+    androidNotificationChannelName: 'Audio playback',
+    androidNotificationOngoing: true,
+  );
   runApp(const ProviderScope(child: MyApp()));
 }
 
@@ -56,12 +65,12 @@ class MyHomePage extends ConsumerStatefulWidget {
 }
 
 class _MyHomePageState extends ConsumerState<MyHomePage> {
-  List<Widget> pages = const [
+  List<Widget> pages = [
     HomePage(),
-    AlbumsPage(),
-    SongsPage(),
-    PlaylistsPage(),
-    ArtistsPage(),
+    const AlbumsPage(),
+    const SongsPage(),
+    const PlaylistsPage(),
+    const ArtistsPage(),
   ];
 
   int songsCount = 0;
@@ -122,13 +131,29 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
       ignoreCase: true,
     );
 
+    List<SongModel> recentAudios = await audioQuery.querySongs(
+      sortType: SongSortType.DATE_ADDED,
+      orderType: OrderType.DESC_OR_GREATER,
+      uriType: UriType.EXTERNAL,
+      ignoreCase: true,
+    );
+
     List<SongModel> filteredAudios = [];
+    List<SongModel> filteredRecentAudios = [];
+    for (var audio in recentAudios) {
+      if (audio.duration != null && audio.duration! > 60000) {
+        filteredRecentAudios.add(audio);
+      }
+    }
     for (var audio in audios) {
       if (audio.duration != null && audio.duration! > 60000) {
         filteredAudios.add(audio);
       }
     }
     ref.read(songListProvider.notifier).update((state) => filteredAudios);
+    ref
+        .read(recentSongListProvider.notifier)
+        .update((state) => filteredRecentAudios);
     ref
         .read(songsCountProvider.notifier)
         .update((state) => filteredAudios.length);
