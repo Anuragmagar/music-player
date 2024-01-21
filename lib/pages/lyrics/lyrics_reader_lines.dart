@@ -33,14 +33,15 @@ class _LyricsReaderLinesState extends ConsumerState<LyricsReaderLines> {
 
   Stream<DurationState> durationState =
       Rx.combineLatest2<Duration, PlaybackEvent, DurationState>(
-          player.positionStream,
-          player.playbackEventStream,
-          (position, playbackEvent) => DurationState(
-                progress: position,
-                buffered: playbackEvent.bufferedPosition,
-                total: playbackEvent.duration,
-                currentIndex: playbackEvent.currentIndex,
-              ));
+    player.positionStream,
+    player.playbackEventStream,
+    (position, playbackEvent) => DurationState(
+      progress: position,
+      buffered: playbackEvent.bufferedPosition,
+      total: playbackEvent.duration,
+      currentIndex: playbackEvent.currentIndex,
+    ),
+  ).asBroadcastStream();
 
   @override
   void dispose() {

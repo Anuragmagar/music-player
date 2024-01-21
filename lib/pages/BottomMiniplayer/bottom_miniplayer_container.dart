@@ -1,5 +1,5 @@
 import 'package:audio_app/pages/BottomMiniplayer/bottom_playerbutton_state.dart';
-import 'package:audio_app/pages/bottom_linear_progress.dart';
+import 'package:audio_app/pages/BottomMiniplayer/bottom_linear_progress.dart';
 import 'package:audio_app/providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
