@@ -1,4 +1,6 @@
-import 'package:audio_app/pages/lyrics_page.dart';
+import 'dart:async';
+
+import 'package:audio_app/pages/lyrics/lyrics_page.dart';
 import 'package:audio_app/providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -14,6 +16,14 @@ class ArtworkWidget extends ConsumerStatefulWidget {
 
 class _ArtworkWidgetState extends ConsumerState<ArtworkWidget> {
   final OnAudioQuery audioQuery = OnAudioQuery();
+  late StreamSubscription<int?> indexStream;
+
+  @override
+  void dispose() {
+    indexStream.cancel();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     final player = ref.read(playerProvider);
@@ -21,7 +31,7 @@ class _ArtworkWidgetState extends ConsumerState<ArtworkWidget> {
     int songIndex = player.currentIndex!;
     SongModel song = songs![songIndex];
 
-    player.currentIndexStream.listen((p) {
+    indexStream = player.currentIndexStream.listen((p) {
       if (p != songIndex) {
         setState(() {
           songIndex = p!;

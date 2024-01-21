@@ -33,6 +33,7 @@ class _SliderPageState extends ConsumerState<SliderPage> {
   void dispose() {
     // TODO: implement dispose
     manager.dispose();
+    durationState.drain();
     super.dispose();
   }
 
@@ -48,13 +49,15 @@ class _SliderPageState extends ConsumerState<SliderPage> {
 
   Stream<DurationState> durationState =
       Rx.combineLatest2<Duration, PlaybackEvent, DurationState>(
-          player.positionStream,
-          player.playbackEventStream,
-          (position, playbackEvent) => DurationState(
-                progress: position,
-                buffered: playbackEvent.bufferedPosition,
-                total: playbackEvent.duration,
-              ));
+    player.positionStream,
+    player.playbackEventStream,
+    (position, playbackEvent) => DurationState(
+      progress: position,
+      buffered: playbackEvent.bufferedPosition,
+      total: playbackEvent.duration,
+    ),
+  ).asBroadcastStream();
+
   @override
   Widget build(BuildContext context) {
     final player = ref.read(playerProvider);

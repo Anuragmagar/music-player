@@ -38,12 +38,26 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
   void initState() {
     // TODO: implement initState
     super.initState();
+
     _generateGradientFromImage();
 
     SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
       systemNavigationBarColor: Color.fromRGBO(42, 41, 49, 1),
       systemNavigationBarDividerColor: Color.fromRGBO(42, 41, 49, 1),
     ));
+
+    final songs = ref.read(songListProvider);
+    int songIndex = player.currentIndex!;
+    SongModel song = songs![songIndex];
+    indexStream = player.currentIndexStream.listen((p) {
+      if (p != songIndex) {
+        setState(() {
+          songIndex = p!;
+          song = songs[songIndex];
+          // _generateGradientFromImage();
+        });
+      }
+    });
   }
 
   @override
@@ -57,17 +71,6 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
 
     super.dispose();
   }
-
-  // getLyric() async {
-  //   final tagger = Audiotagger();
-
-  //   final String filePath = widget.song.data;
-  //   // final AudioFile? audioFile = await tagger.readAudioFile(path: filePath);
-  //   final Map? map = await tagger.readTagsAsMap(path: filePath);
-  //   setState(() {
-  //     lyric = map!['lyric'];
-  //   });
-  // }
 
   _generateGradientFromImage() async {
     final player = ref.watch(playerProvider);
@@ -88,8 +91,6 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
 
     setState(() {
       colors = [
-        // paletteGenerator.dominantColor?.color ?? Colors.white,
-        // const Color.fromRGBO(24, 24, 26, 1)
         paletteGenerator.mutedColor?.color ?? Colors.white,
         const Color.fromRGBO(24, 24, 26, 1)
       ];
@@ -127,15 +128,6 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
     SongModel song = songs![songIndex];
 
     _generateGradientFromImage();
-    indexStream = player.currentIndexStream.listen((p) {
-      if (p != songIndex) {
-        setState(() {
-          songIndex = p!;
-          song = songs[songIndex];
-          // _generateGradientFromImage();
-        });
-      }
-    });
 
     return Scaffold(
       backgroundColor: const Color.fromRGBO(24, 24, 26, 1),
