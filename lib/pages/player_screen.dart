@@ -22,7 +22,10 @@ class PlayerScreen extends ConsumerStatefulWidget {
   _PlayerScreenState createState() => _PlayerScreenState();
 }
 
-class _PlayerScreenState extends ConsumerState<PlayerScreen> {
+class _PlayerScreenState extends ConsumerState<PlayerScreen>
+    with TickerProviderStateMixin {
+  late AnimationController _controller;
+
   final OnAudioQuery audioQuery = OnAudioQuery();
   late StreamSubscription<int?> indexStream;
 
@@ -58,6 +61,11 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
         });
       }
     });
+
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 500),
+      vsync: this,
+    );
   }
 
   @override
@@ -68,6 +76,8 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
       systemNavigationBarColor: Color.fromRGBO(42, 41, 49, 1),
       systemNavigationBarDividerColor: Color.fromRGBO(42, 41, 49, 1),
     ));
+
+    _controller.dispose();
 
     super.dispose();
   }
@@ -131,7 +141,8 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
 
     return Scaffold(
       backgroundColor: const Color.fromRGBO(24, 24, 26, 1),
-      body: Container(
+      body: AnimatedContainer(
+        duration: const Duration(milliseconds: 500),
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: colors,
@@ -207,10 +218,12 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
                       if (player.playing) {
                         setState(() {
                           player.pause();
+                          _controller.forward();
                         });
                       } else {
                         setState(() {
                           player.play();
+                          _controller.reverse();
                         });
                       }
                     },
@@ -220,12 +233,18 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
                         borderRadius: BorderRadius.circular(50),
                       ),
                       child: Padding(
-                        padding: const EdgeInsets.all(25.0),
-                        child: Icon(
-                          player.playing
-                              ? PhosphorIconsFill.pause
-                              : PhosphorIconsFill.play,
-                          size: 25,
+                        padding: const EdgeInsets.all(20.0),
+                        // child: Icon(
+                        //   player.playing
+                        //       ? PhosphorIconsFill.pause
+                        //       : PhosphorIconsFill.play,
+                        //   size: 25,
+                        //   color: const Color.fromRGBO(52, 35, 35, 1),
+                        // ),
+                        child: AnimatedIcon(
+                          icon: AnimatedIcons.pause_play,
+                          size: 35,
+                          progress: _controller,
                           color: const Color.fromRGBO(52, 35, 35, 1),
                         ),
                       ),

@@ -21,6 +21,17 @@ class ArtistDetailPage extends StatefulWidget {
   State<ArtistDetailPage> createState() => _ArtistDetailPageState();
 }
 
+String formatDuration(int? milliseconds) {
+  if (milliseconds == null) {
+    return 'Unknown duration';
+  }
+
+  Duration duration = Duration(milliseconds: milliseconds);
+  String minutes = '${duration.inMinutes}'.padLeft(2, '0');
+  String seconds = '${duration.inSeconds % 60}'.padLeft(2, '0');
+  return '$minutes:$seconds';
+}
+
 class _ArtistDetailPageState extends State<ArtistDetailPage>
     with SingleTickerProviderStateMixin {
   final OnAudioQuery audioQuery = OnAudioQuery();
@@ -29,6 +40,7 @@ class _ArtistDetailPageState extends State<ArtistDetailPage>
   bool _isExpanded = false;
   String bio = '';
   bool isGettingArtistBio = true;
+  int totalTime = 0;
 
   @override
   void initState() {
@@ -40,6 +52,8 @@ class _ArtistDetailPageState extends State<ArtistDetailPage>
       ..addListener(() {
         setState(() {});
       });
+
+    getArtistSongs();
 
     // WidgetsBinding.instance.addPostFrameCallback((_) => getArtistBio());
   }
@@ -61,6 +75,21 @@ class _ArtistDetailPageState extends State<ArtistDetailPage>
       });
     }
     return response.statusCode.toString();
+  }
+
+  Future<List<SongModel>> getArtistSongs() async {
+    List<SongModel> audios =
+        await audioQuery.queryAudiosFrom(AudiosFromType.ARTIST, widget.artist);
+
+    List<SongModel> filteredAudios = [];
+    for (var audio in audios) {
+      if (audio.duration != null && audio.duration! > 60000) {
+        // totalTime = totalTime + audio.duration!;
+        filteredAudios.add(audio);
+        // setState(() {});
+      }
+    }
+    return filteredAudios;
   }
 
   @override
@@ -133,7 +162,6 @@ class _ArtistDetailPageState extends State<ArtistDetailPage>
                         style: const TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.w900,
-                          fontFamily: 'CircularStd',
                           fontSize: 25,
                         ),
                         textAlign: TextAlign.center,
@@ -143,7 +171,7 @@ class _ArtistDetailPageState extends State<ArtistDetailPage>
           ),
           SliverToBoxAdapter(
             child: Text(
-              '${widget.noOfTracks} Songs・09:33',
+              '${widget.noOfTracks} Songs・${formatDuration(totalTime)}',
               textAlign: TextAlign.center,
             ),
           ),
@@ -158,20 +186,79 @@ class _ArtistDetailPageState extends State<ArtistDetailPage>
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'Songs',
-                    style: TextStyle(
-                        fontFamily: 'Grover',
-                        fontSize: 20,
-                        fontWeight: FontWeight.w900),
+                  const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 10.0),
+                    child: Text(
+                      'Songs',
+                      style:
+                          TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    ),
                   ),
                   const SizedBox(height: 25),
-                  const Text(
-                    'Biography',
-                    style: TextStyle(
-                        fontFamily: 'Grover',
-                        fontSize: 20,
-                        fontWeight: FontWeight.w900),
+                  FutureBuilder<List<SongModel>>(
+                    future: getArtistSongs(),
+                    builder: (context, snapshot) {
+                      final data = snapshot.data;
+                      if (snapshot.hasData) {
+                        return Column(
+                          children: [
+                            for (int index = 0; index < data!.length; index++)
+                              ListTile(
+                                contentPadding:
+                                    const EdgeInsets.symmetric(horizontal: 10),
+                                title: Text(
+                                  data[index].title,
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                subtitle: Text(
+                                  '${data[index].artist}・${formatDuration(data[index].duration)}',
+                                  style: const TextStyle(
+                                      color: Color.fromRGBO(218, 218, 218, 1)),
+                                  overflow: TextOverflow.ellipsis,
+                                  maxLines: 1,
+                                ),
+                                leading: ClipRRect(
+                                  borderRadius: const BorderRadius.all(
+                                      Radius.circular(10.0)),
+                                  child: QueryArtworkWidget(
+                                    controller: audioQuery,
+                                    id: data[index].id,
+                                    type: ArtworkType.AUDIO,
+                                    artworkBorder: BorderRadius.circular(10),
+                                    nullArtworkWidget: Container(
+                                      height: 50,
+                                      width: 50,
+                                      color: Colors.white60,
+                                      child: const Icon(
+                                          PhosphorIconsDuotone.musicNote,
+                                          color: Colors.white),
+                                    ),
+                                  ),
+                                ),
+                                trailing: const Icon(
+                                  PhosphorIconsFill.dotsThreeOutlineVertical,
+                                  color: Color.fromRGBO(218, 218, 218, 1),
+                                ),
+                              )
+                          ],
+                        );
+                      }
+                      return const Text('No songs');
+                    },
+                  ),
+                  const SizedBox(height: 20),
+                  const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 10.0),
+                    child: Text(
+                      'Biography',
+                      style:
+                          TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    ),
                   ),
                   GestureDetector(
                     onTap: () {
@@ -184,32 +271,35 @@ class _ArtistDetailPageState extends State<ArtistDetailPage>
                       curve: Curves.easeInOut,
                       child: isGettingArtistBio
                           ? const Center(child: CircularProgressIndicator())
-                          : Column(
-                              children: [
-                                Text(
-                                  bio,
-                                  maxLines: _isExpanded ? null : 3,
-                                ),
-                                _isExpanded
-                                    ? const SizedBox.shrink()
-                                    : const Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.end,
-                                        children: [
-                                          Text(
-                                            'More',
-                                            style:
-                                                TextStyle(color: Colors.purple),
-                                            textAlign: TextAlign.right,
-                                          ),
-                                          Icon(
-                                            PhosphorIconsRegular.caretDown,
-                                            color: Colors.purple,
-                                            size: 16,
-                                          )
-                                        ],
-                                      )
-                              ],
+                          : Padding(
+                              padding: const EdgeInsets.all(10.0),
+                              child: Column(
+                                children: [
+                                  Text(
+                                    bio,
+                                    maxLines: _isExpanded ? null : 3,
+                                  ),
+                                  _isExpanded
+                                      ? const SizedBox.shrink()
+                                      : const Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.end,
+                                          children: [
+                                            Text(
+                                              'More',
+                                              style: TextStyle(
+                                                  color: Colors.purple),
+                                              textAlign: TextAlign.right,
+                                            ),
+                                            Icon(
+                                              PhosphorIconsRegular.caretDown,
+                                              color: Colors.purple,
+                                              size: 16,
+                                            )
+                                          ],
+                                        )
+                                ],
+                              ),
                             ),
                     ),
                   )

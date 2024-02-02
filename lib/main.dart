@@ -3,7 +3,6 @@ import 'package:audio_app/pages/artists_page.dart';
 import 'package:audio_app/pages/BottomMiniplayer/bottom_mini_player.dart';
 import 'package:audio_app/pages/bottom_navbar.dart';
 import 'package:audio_app/pages/home_page.dart';
-import 'package:audio_app/pages/player_screen.dart';
 import 'package:audio_app/pages/playlists_page.dart';
 import 'package:audio_app/pages/songs_page.dart';
 import 'package:audio_app/providers.dart';
@@ -65,6 +64,9 @@ class MyHomePage extends ConsumerStatefulWidget {
 }
 
 class _MyHomePageState extends ConsumerState<MyHomePage> {
+  bool _hasPermission = false;
+  final OnAudioQuery audioQuery = OnAudioQuery();
+
   List<Widget> pages = [
     HomePage(),
     const AlbumsPage(),
@@ -73,20 +75,11 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
     const ArtistsPage(),
   ];
 
-  int songsCount = 0;
-  // Main method.
-  final OnAudioQuery audioQuery = OnAudioQuery();
-
-  // Indicate if application has permission to the library.
-  bool _hasPermission = false;
   @override
   void initState() {
     super.initState();
 
     _checkPermissions();
-    checkAndRequestPermissions();
-
-    getSongs();
 
     SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
       systemNavigationBarColor: Color.fromRGBO(42, 41, 49, 1),
@@ -98,65 +91,6 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
     if (!await Permission.storage.request().isGranted) {
       await _checkPermissions();
     }
-  }
-
-  checkAndRequestPermissions({bool retry = true}) async {
-    // The param 'retryRequest' is false, by default.
-    _hasPermission = await audioQuery.checkAndRequest(
-      retryRequest: retry,
-    );
-
-    // Only call update the UI if application has all required permissions.
-    _hasPermission
-        ? setState(() {})
-        : ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content:
-                  const Text('Please grant storage permission to use the app'),
-              action: SnackBarAction(
-                label: 'Grant',
-                onPressed: () {
-                  checkAndRequestPermissions(retry: true);
-                },
-              ),
-            ),
-          );
-  }
-
-  getSongs() async {
-    List<SongModel> audios = await audioQuery.querySongs(
-      sortType: null,
-      orderType: OrderType.ASC_OR_SMALLER,
-      uriType: UriType.EXTERNAL,
-      ignoreCase: true,
-    );
-
-    List<SongModel> recentAudios = await audioQuery.querySongs(
-      sortType: SongSortType.DATE_ADDED,
-      orderType: OrderType.DESC_OR_GREATER,
-      uriType: UriType.EXTERNAL,
-      ignoreCase: true,
-    );
-
-    List<SongModel> filteredAudios = [];
-    List<SongModel> filteredRecentAudios = [];
-    for (var audio in recentAudios) {
-      if (audio.duration != null && audio.duration! > 60000) {
-        filteredRecentAudios.add(audio);
-      }
-    }
-    for (var audio in audios) {
-      if (audio.duration != null && audio.duration! > 60000) {
-        filteredAudios.add(audio);
-      }
-    }
-    ref.read(songListProvider.notifier).update((state) => filteredAudios);
-    ref
-        .read(recentSongListProvider.notifier)
-        .update((state) => filteredRecentAudios);
-    ref
-        .read(songsCountProvider.notifier)
-        .update((state) => filteredAudios.length);
   }
 
   @override
